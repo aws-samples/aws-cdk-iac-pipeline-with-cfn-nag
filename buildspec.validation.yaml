@@ -1,0 +1,13 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+        ruby: 2.6
+    commands:
+      - echo Installing Bundler...
+      - gem install cfn-nag 
+  build:
+    commands:
+      - ls -lstr
+      - echo "Testing output with cfn-nag-scan"
+      - cfn_nag_scan --input-path cdk/out --template-pattern "..*\.template\.json" -g

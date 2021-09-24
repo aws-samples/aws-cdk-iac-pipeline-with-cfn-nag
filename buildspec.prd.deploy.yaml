@@ -1,0 +1,18 @@
+version: 0.2
+env:
+  variables:
+    DIST_FOLDER: "dist"
+    BUILD_ENV: "prd"
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+  pre_build:
+    commands:
+      - echo "Install dependencies"
+      - cd cdk
+      - npm install
+      - npm run build
+  build:
+    commands:
+      - npx cdk deploy -v --all --require-approval=never
