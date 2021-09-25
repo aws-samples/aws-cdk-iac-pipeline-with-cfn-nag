@@ -13,7 +13,7 @@ The pipeline consists of a total of 6 stages. All stages except source and manua
 - Manual approval
 - PRD-Deploy
 
-![iac-pipeline](https://user-images.githubusercontent.com/27997183/134334939-3870ff8d-5a7e-4bcc-91bf-766a54031b8d.jpg)
+![pipeline-overview](https://user-images.githubusercontent.com/27997183/134777698-bed93e48-2d7f-4914-9550-ae8c150a215e.jpg)
 
 The infrastructure to be deployed and the source of the pipeline are kept in codecommit, and the pipeline is triggered when a new source is committed. After that, in the pipeline, the code written in cdk is made into a cloudformation template through the synth process, and it is scanned for vulnerabilities through the cfn-nag tool. If CRITICAL is not found in the vulnerability scan, it will be deployed to the dev environment. After checking the DEV deployment result, you should approve manual approval stage on AWS Codepipeline, then deployment proceeds to the PRD environment.
 
@@ -57,7 +57,21 @@ Execution policies: arn:aws:iam::aws:policy/AdministratorAccess
  ✅  Environment aws://xxxxxxxxxxxx/ap-northeast-2 bootstrapped (no changes).
 ```
 
-### 4. Deploy pipeline stack
+### 4. Set up Toolchain, DEV, PRD Account Id on .env
+You need to set up your own account id on .env file for target account configuration
+```
+# copy sample env file to your own .env
+cp pipeline/.env_sample pipeline/.env
+
+vi pipeline/.env
+
+# YOU HAVE TO CHANGE BELOW ACCOUNT ID WITH YOURS
+TOOLCHAIN_ACCOUNT_ID="123456789012" > YOU SHOULD CHANGE THIS ACCOUNT ID 
+DEV_TARGET_ACCOUNT_ID="123456789012" > YOU SHOULD CHANGE THIS ACCOUNT ID 
+PRD_TARGET_ACCOUNT_ID="123456789012" > YOU SHOULD CHANGE THIS ACCOUNT ID 
+```
+
+### 5. Deploy pipeline stack
 Deploy pipeline stack on Toolchain account with cdk cli, you need to enter "y" after checking resources list that created with this stack.
 ```
 cdk deploy -v --all --profile ${toolchain_account_profile}

@@ -4,9 +4,21 @@ import * as codebuild from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions';
 import * as iam from '@aws-cdk/aws-iam';
+import * as dotenv from "dotenv";
+
+dotenv.config();
+
 export class IaCPipelineStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    if(!process.env.TOOLCHAIN_ACCOUNT_ID) throw Error("NO VALUE ON TOOLCHAIN ACCOUNT ID")
+    if(!process.env.DEV_TARGET_ACCOUNT_ID) throw Error("NO VALUE ON DEV ACCOUNT ID")
+    if(!process.env.PRD_TARGET_ACCOUNT_ID) throw Error("NO VALUE ON PRD ACCOUNT ID")
+
+    const TOOLCHAIN_ACCOUNT_ID=process.env.TOOLCHAIN_ACCOUNT_ID
+    const DEV_TARGET_ACCOUNT_ID=process.env.DEV_TARGET_ACCOUNT_ID
+    const PRD_TARGET_ACCOUNT_ID=process.env.PRD_TARGET_ACCOUNT_ID
 
     const repo = new codecommit.Repository(this, 'Repository', {
       repositoryName: 'codecommit-for-iac',
@@ -19,7 +31,7 @@ export class IaCPipelineStack extends cdk.Stack {
         buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_2
       },
       environmentVariables: {
-        "TARGET_ACCOUNT": { value: '118309272831' }
+        "TARGET_ACCOUNT": { value: DEV_TARGET_ACCOUNT_ID }
       }
     });
 
@@ -36,7 +48,7 @@ export class IaCPipelineStack extends cdk.Stack {
         buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_2
       },
       environmentVariables: {
-        "TARGET_ACCOUNT": { value: '118309272831' }
+        "TARGET_ACCOUNT": { value: DEV_TARGET_ACCOUNT_ID }
       }
     });
 
@@ -46,23 +58,23 @@ export class IaCPipelineStack extends cdk.Stack {
         buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_2
       },
       environmentVariables: {
-        "TARGET_ACCOUNT": { value: '216944898468' }
+        "TARGET_ACCOUNT": { value: PRD_TARGET_ACCOUNT_ID }
       }
     });
 
     cdkSynth.addToRolePolicy(new iam.PolicyStatement({
       actions: ['sts:AssumeRole'],
-      resources: ['arn:aws:iam::091700113757:role/cdk*', 'arn:aws:iam::118309272831:role/cdk*'],
+      resources: [`arn:aws:iam::${TOOLCHAIN_ACCOUNT_ID}:role/cdk*`, `arn:aws:iam::${DEV_TARGET_ACCOUNT_ID}:role/cdk*`],
     }));
 
     cdkDevDeploy.addToRolePolicy(new iam.PolicyStatement({
       actions: ['sts:AssumeRole'],
-      resources: ['arn:aws:iam::091700113757:role/cdk*', 'arn:aws:iam::118309272831:role/cdk*'],
+      resources: [`arn:aws:iam::${TOOLCHAIN_ACCOUNT_ID}:role/cdk*`, `arn:aws:iam::${DEV_TARGET_ACCOUNT_ID}:role/cdk*`],
     }));
 
     cdkPrdDeploy.addToRolePolicy(new iam.PolicyStatement({
       actions: ['sts:AssumeRole'],
-      resources: ['arn:aws:iam::091700113757:role/cdk*', 'arn:aws:iam::216944898468:role/cdk*'],
+      resources: [`arn:aws:iam::${TOOLCHAIN_ACCOUNT_ID}:role/cdk*`, `arn:aws:iam::${PRD_TARGET_ACCOUNT_ID}:role/cdk*`],
     }));
 
     const sourceOutput = new codepipeline.Artifact();
