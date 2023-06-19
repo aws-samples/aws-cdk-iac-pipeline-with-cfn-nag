@@ -21,7 +21,7 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-eks": "^1.123.0",
+    "@aws-cdk/aws-eks": "^1.202.0",
     "@aws-cdk/aws-sns": "1.123.0",
     "@aws-cdk/aws-sns-subscriptions": "1.123.0",
     "@aws-cdk/aws-sqs": "1.123.0",
